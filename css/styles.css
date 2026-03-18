@@ -126,7 +126,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); line-height: 1.2; }
   font-size: 1.25rem; color: var(--white);
   letter-spacing: -0.02em; cursor: pointer;
 }
-.nav-logo img { height: 44px; width: auto; border-radius: 0; image-rendering: -webkit-optimize-contrast; }
+.nav-logo img { height: 56px; width: auto; border-radius: 0; image-rendering: -webkit-optimize-contrast; }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 .nav-link {
   color: var(--slate-300); font-size: 0.9rem; font-weight: 500;
@@ -292,9 +292,14 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); line-height: 1.2; }
 
 /* ═══════════════ BENEFITS ═══════════════ */
 .benefits-section { background: var(--slate-50); }
-/* Benefits Carousel — base styles (layout & interaction handled by inline script in index.html) */
-.benefits-slide h3 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: var(--navy-900); margin-bottom: 16px; font-family: var(--font-display); line-height: 1.15; }
-.benefits-slide p { font-size: 1.05rem; color: var(--slate-500); line-height: 1.8; max-width: 580px; margin: 0 auto; }
+/* Benefits Carousel — layout handled by inline <style> in index.html */
+/* Only typography and colors defined here (no display, no layout, no animation) */
+.benefits-slide h3 {
+  font-size: 1.15rem; font-weight: 800; color: var(--navy-900);
+  margin-bottom: 8px; font-family: var(--font-display); line-height: 1.3;
+  white-space: nowrap;
+}
+.benefits-slide p { font-size: 0.95rem; color: var(--slate-500); line-height: 1.7; max-width: 580px; margin: 0 auto; }
 .section-header { text-align: center; margin-bottom: 64px; }
 .section-label {
   display: inline-block; font-size: 0.78rem; font-weight: 700;
@@ -708,9 +713,11 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); line-height: 1.2; }
   flex-wrap: wrap; gap: 16px;
 }
 .footer-text { color: var(--slate-500); font-size: 0.88rem; }
+.footer-logo { display: flex; align-items: center; }
+.footer-logo img { height: 48px; width: auto; image-rendering: -webkit-optimize-contrast; }
 .footer-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .footer-links a {
-  color: var(--slate-400); font-size: 0.85rem; font-weight: 500;
+  color: var(--slate-400); font-size: 0.88rem; font-weight: 500;
   font-family: var(--font-display); transition: color 0.2s;
 }
 .footer-links a:hover { color: var(--blue-300); }
@@ -742,5 +749,5 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); line-height: 1.2; }
   .carousel-nav.prev { left: -8px; }
   .carousel-nav.next { right: -8px; }
   .footer-inner { flex-direction: column; text-align: center; }
-  .nav-logo img { height: 32px; width: auto; }
+  .nav-logo img { height: 40px; width: auto; }
 }
