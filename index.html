@@ -38,21 +38,153 @@
       <a class="nav-link" href="pages/events.html" data-page="events">Events</a>
       <a class="nav-link nav-cta" href="pages/contact.html" data-page="contact">Contact Us</a>
     </div>
+    <button class="nav-search-btn" id="searchToggle" onclick="toggleSearch()" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
     <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
-<!-- ═══════════════ HOME PAGE ═══════════════ -->
+<!-- ═══════════════ SEARCH OVERLAY ═══════════════ -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-overlay-inner">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search this site…" autocomplete="off">
+    <button class="search-close" onclick="toggleSearch()" aria-label="Close search">✕</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<style>
+/* ── Navbar search button ── */
+.nav-search-btn {
+  background: none;
+  border: none;
+  color: var(--slate-600, #475569);
+  cursor: pointer;
+  padding: 6px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  transition: color .2s;
+}
+.nav-search-btn:hover { color: var(--accent, #3b82f6); }
+
+/* ── Search overlay ── */
+.search-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(12px);
+  padding: 80px 24px 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.08);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .3s;
+  pointer-events: none;
+}
+.search-overlay.active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.search-overlay-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.search-input {
+  flex: 1;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  padding: 14px 20px;
+  border: 2px solid var(--slate-200, #e2e8f0);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: var(--accent, #3b82f6); }
+.search-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--slate-500, #64748b);
+  padding: 8px;
+}
+.search-results {
+  max-width: 640px;
+  margin: 16px auto 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.search-result-item {
+  display: block;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background .15s;
+}
+.search-result-item:hover { background: var(--slate-100, #f1f5f9); }
+.search-result-item h4 { margin: 0 0 4px; font-size: 0.95rem; color: var(--accent, #3b82f6); }
+.search-result-item p { margin: 0; font-size: 0.85rem; color: var(--slate-500, #64748b); }
+.search-no-results { text-align: center; color: var(--slate-400, #94a3b8); padding: 20px 0; }
+</style>
+
+<script>
+/* ── Site search ── */
+var sitePages = [
+  { title:'Home', url:'index.html', keywords:'home mytrucksure insurance saas trucking platform carrier broker mga' },
+  { title:'Partners', url:'pages/partners.html', keywords:'partners partnerships integrations ecosystem technology' },
+  { title:'Solutions — Underwriting', url:'pages/solutions.html#underwriting', keywords:'solutions underwriting rate quote bind digital workflow' },
+  { title:'Solutions — Policy Admin', url:'pages/solutions.html#policyadmin', keywords:'solutions policy administration endorsements renewal cancellation' },
+  { title:'Solutions — Billing & Payments', url:'pages/solutions.html#billing', keywords:'solutions billing payments premium finance' },
+  { title:'Events', url:'pages/events.html', keywords:'events conferences trade shows industry' },
+  { title:'Contact Us', url:'pages/contact.html', keywords:'contact demo email phone martin crew josh linton' }
+];
+function toggleSearch(){
+  var o = document.getElementById('searchOverlay');
+  o.classList.toggle('active');
+  if(o.classList.contains('active')){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    setTimeout(function(){ document.getElementById('searchInput').focus(); }, 100);
+  }
+}
+document.getElementById('searchInput').addEventListener('input', function(){
+  var q = this.value.trim().toLowerCase();
+  var res = document.getElementById('searchResults');
+  if(!q){ res.innerHTML=''; return; }
+  var matches = sitePages.filter(function(p){
+    return p.title.toLowerCase().indexOf(q) !== -1 || p.keywords.indexOf(q) !== -1;
+  });
+  if(matches.length === 0){
+    res.innerHTML='<p class="search-no-results">No results found for "'+q+'"</p>';
+  } else {
+    res.innerHTML = matches.map(function(m){
+      return '<a class="search-result-item" href="'+m.url+'"><h4>'+m.title+'</h4><p>'+m.url+'</p></a>';
+    }).join('');
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') {
+    var o = document.getElementById('searchOverlay');
+    if(o.classList.contains('active')) toggleSearch();
+  }
+});
+</script>
 
 <!-- Hero — Full-screen truck background -->
 <section class="hero" id="hero-section">
   <div class="hero-bg" id="heroBg"></div>
   <div class="container">
     <div class="hero-content">
-      <div class="hero-badge"><span class="hero-badge-dot"></span> Insurance SaaS Platform</div>
-      <h1>MyTrucksure<br><em>make insurance easy</em></h1>
+      <div class="hero-badge" style="display:none;"><span class="hero-badge-dot"></span> Insurance SaaS Platform</div>
+      <h1>MyTrucksure<br>Insurance SaaS Solution<br><em>make insurance easy</em></h1>
       <p class="hero-sub">The MyTrucksure is a purpose built SaaS app for the trucking insurance market. It is a technology platform for insurance Carriers, MGA's, Brokers and InsureTech's as well as Lloyd's syndicates and Risk Retention Groups. Whether your organization is large or small, it is for anyone who is looking to sell and service insurance to the highly specialized U.S. trucking industry.</p>
       <div class="hero-ctas">
         <a class="btn btn-primary" href="pages/contact.html">Get a Demo →</a>
@@ -323,14 +455,14 @@
         <h3>Martin Crew</h3>
         <span class="role">Vice President &amp; General Manager, MyTrucksure</span>
         <div class="contact-detail">📞 <a href="tel:+17735802168">+1 773 580 2168</a></div>
-        <div class="contact-detail">✉️ <a href="/cdn-cgi/l/email-protection#127f7360667b7c3c71607765527f6b6660677179616760773c717d7f"><span class="__cf_email__" data-cfemail="b8d5d9caccd1d696dbcaddcff8d5c1cccacddbd3cbcdcadd96dbd7d5">[email&#160;protected]</span></a></div>
+        <div class="contact-detail">✉️ <a href="mailto:martin.crew@mytrucksure.com">martin.crew@mytrucksure.com</a></div>
         <div class="contact-detail">🔗 <a href="https://www.linkedin.com/in/martin-crew-794110b/" target="_blank">LinkedIn</a></div>
       </div>
       <div class="contact-person reveal">
         <h3>Josh Linton</h3>
         <span class="role">Sales Director, MyTrucksure</span>
         <div class="contact-detail">📞 <a href="tel:+14127091909">+1 412 709 1909</a></div>
-        <div class="contact-detail">✉️ <a href="/cdn-cgi/l/email-protection#315b5e42591f5d585f455e5f715c48454344525a424443541f525e5c"><span class="__cf_email__" data-cfemail="274d48544f094b4e49534849674a5e535552444c545255420944484a">[email&#160;protected]</span></a></div>
+        <div class="contact-detail">✉️ <a href="mailto:josh.linton@mytrucksure.com">josh.linton@mytrucksure.com</a></div>
         <div class="contact-detail">🔗 <a href="https://www.linkedin.com/in/jtlinton" target="_blank">LinkedIn</a></div>
       </div>
     </div>
