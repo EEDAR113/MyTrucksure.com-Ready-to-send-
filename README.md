@@ -12,7 +12,8 @@ A multi-page static website showcasing insurance technology solutions, partnersh
 ├── css/
 │   └── styles.css                    ← Global stylesheet
 ├── js/
-│   └── script.js                     ← Shared JavaScript (navbar, interactions)
+│   ├── script.js                     ← Shared JavaScript (navbar, interactions, nav search)
+│   └── search-index.js               ← Full-text search index (all page content)
 ├── images/                           ← All image assets
 │   ├── MyTrucksure_logo.png          ← Primary site logo (navbar)
 │   └── (banners, event photos, partner logos, etc.)
@@ -21,6 +22,7 @@ A multi-page static website showcasing insurance technology solutions, partnersh
 │   ├── solutions.html                ← Solutions page
 │   ├── events.html                   ← Events listing page
 │   ├── contact.html                  ← Contact page
+│   ├── search.html                   ← Site-wide search results page
 │   └── events/                       ← Individual event detail pages
 │       ├── itc-vegas.html
 │       ├── insurtech-chicago.html
@@ -31,9 +33,9 @@ A multi-page static website showcasing insurance technology solutions, partnersh
 
 ### How paths work
 
-- `index.html` references CSS/JS as `css/styles.css` and `js/script.js`, and images as `images/filename`.
-- Files inside `pages/` use `../css/styles.css`, `../js/script.js`, and `../images/filename`.
-- Files inside `pages/events/` use `../../css/styles.css`, `../../js/script.js`, and `../../images/filename`.
+- `index.html` references CSS/JS as `css/styles.css`, `js/script.js`, and `js/search-index.js`, and images as `images/filename`.
+- Files inside `pages/` use `../css/styles.css`, `../js/script.js`, `../js/search-index.js`, and `../images/filename`.
+- Files inside `pages/events/` use `../../css/styles.css`, `../../js/script.js`, `../../js/search-index.js`, and `../../images/filename`.
 
 > **Important:** The `images/` folder must stay at the root level. Moving it will break image paths across all pages.
 
@@ -48,11 +50,57 @@ A multi-page static website showcasing insurance technology solutions, partnersh
 | Solutions | `pages/solutions.html` | Insurance technology solutions offered |
 | Events | `pages/events.html` | Listing of all industry events |
 | Contact | `pages/contact.html` | Contact information and form |
+| Search | `pages/search.html` | Site-wide full-text search results page |
 | ITC Vegas | `pages/events/itc-vegas.html` | ITC Vegas event details |
 | InsurTech Chicago | `pages/events/insurtech-chicago.html` | InsurTech Chicago event details |
 | MCIEF | `pages/events/mcief.html` | MCIEF event details |
 | InsurTech NY | `pages/events/insurtech-ny.html` | InsurTech New York event details |
 | ATD Show | `pages/events/atd-show.html` | ATD Show event details |
+
+---
+
+## Site-Wide Search
+
+The site includes a client-side full-text search system that works entirely in the browser with no server required.
+
+### How it works
+
+1. **Search icon in the navbar** — Every page has a 🔍 icon in the navbar (next to the hamburger menu on mobile). Clicking it expands a text input. Pressing Enter navigates to the search results page.
+2. **Search results page** (`pages/search.html`) — Reads the `?q=` query parameter, searches the index, and displays matching pages with highlighted snippets. Typing in the search bar updates results live and also updates the URL.
+3. **Search index** (`js/search-index.js`) — A JavaScript file containing the plain-text content of every page in an array. This is loaded on all pages so the navbar search can redirect to the results page with the query.
+
+### Search result highlights
+
+Matching terms in the search results are wrapped in `<mark class="search-highlight">` tags and displayed with a **yellow background**, making it easy to spot where the query appears in each page's content.
+
+### Maintaining the search index
+
+When you add or edit a page, you must update `js/search-index.js` to keep search results accurate:
+
+1. Open `js/search-index.js`.
+2. Find the entry for the page you changed (matched by `title` and `url`), or add a new entry if it's a new page.
+3. Update the `content` field with the page's plain text (strip all HTML tags — just the readable text content).
+4. Save and deploy.
+
+**Entry format:**
+```javascript
+{
+  title: "Page Title",              // Displayed in search results
+  url: "pages/example.html",       // Relative to site root (index.html level)
+  content: "All the visible text…"  // Plain text, no HTML
+}
+```
+
+> **Tip:** The `url` field must be relative to the site root. For event detail pages, use `pages/events/filename.html`.
+
+### Files involved
+
+| File | Purpose |
+|------|---------|
+| `js/search-index.js` | Contains the searchable text content of every page |
+| `pages/search.html` | The search results page (reads `?q=` and renders results) |
+| `js/script.js` | Contains `initNavSearch()` which powers the navbar search icon on all pages |
+| `css/styles.css` | Contains `.search-page-*` and `.search-highlight` styles |
 
 ---
 
@@ -155,8 +203,9 @@ Alternatively, drag and drop: download the repo as a ZIP, unzip it, then drag th
 
 1. Open the `.html` file in a code editor (VS Code recommended — free at [code.visualstudio.com](https://code.visualstudio.com)).
 2. Find the section you want to change and edit the text, links, or images.
-3. Save and refresh your browser to preview.
-4. Commit and push to deploy.
+3. **Update `js/search-index.js`** — if you changed any visible text, update the corresponding `content` field in the search index so search results stay accurate.
+4. Save and refresh your browser to preview.
+5. Commit and push to deploy.
 
 ### Adding a new event page
 
@@ -167,7 +216,8 @@ Alternatively, drag and drop: download the repo as a ZIP, unzip it, then drag th
    ```html
    <a href="events/new-event.html">New Event Name</a>
    ```
-5. Save, commit, and push.
+5. **Add a new entry to `js/search-index.js`** with the page's title, URL (`pages/events/new-event.html`), and plain-text content.
+6. Save, commit, and push.
 
 ### Adding a new top-level page
 
@@ -175,7 +225,8 @@ Alternatively, drag and drop: download the repo as a ZIP, unzip it, then drag th
 2. Rename it (e.g., `new-page.html`).
 3. Replace the content, keeping the navbar and footer intact.
 4. Add a navigation link in every page's navbar pointing to the new page (update `index.html` and all files in `pages/` and `pages/events/` — path depth matters).
-5. Save, commit, and push.
+5. **Add a new entry to `js/search-index.js`** with the page's title, URL (`pages/new-page.html`), and plain-text content.
+6. Save, commit, and push.
 
 ### Updating styles
 
@@ -191,12 +242,19 @@ Place new images in the `images/` folder and update the `src` attribute in the r
 
 - **HTML5** — semantic markup for all pages
 - **CSS3** — responsive design, custom properties, flexbox/grid layouts
-- **JavaScript (vanilla)** — navbar toggle, scroll interactions, benefits carousel, no frameworks
+- **JavaScript (vanilla)** — navbar toggle, scroll interactions, benefits carousel, client-side search, no frameworks
 - **No build step** — edit and deploy directly, no `npm install` or compilation needed
 
 ---
 
 ## Changelog
+
+### 2025-03-24
+
+- **Site-wide search added** — A full-text search system was added across all pages. A search icon in the navbar expands an inline text input; pressing Enter navigates to a dedicated search results page (`pages/search.html`). Results display page titles with content snippets and matching terms highlighted in yellow. The search runs entirely client-side using a JavaScript index file (`js/search-index.js`).
+- **New files:** `pages/search.html` (search results page), `js/search-index.js` (search index containing all page content).
+- **Modified files:** All HTML pages (navbar updated with search form), `css/styles.css` (search page and highlight styles added), `js/script.js` (navbar search interaction logic added).
+- **Old search overlay removed** — The previous inline search overlay on `index.html` (which only matched page titles/keywords) was replaced with the new full-text search system.
 
 ### 2025-03-18
 
@@ -214,6 +272,7 @@ Place new images in the `images/` folder and update the `src` attribute in the r
 | CSS not loading | Check that the `<link>` tag in the HTML `<head>` points to the correct relative path for `styles.css` |
 | Page links broken (404) | Make sure filenames are lowercase and match the `href` values exactly — file names are case-sensitive on most servers |
 | Carousel not auto-rotating | Check the browser console for JS errors; the inline script in `index.html` must run after the carousel HTML |
+| Search returns no results | Verify that the page content was added to `js/search-index.js` and the file is loaded (check for 404 in browser console) |
+| Search not working on a page | Confirm the page includes both `<script src="...search-index.js">` and `<script src="...script.js">` with the correct relative paths |
 | Changes not appearing on live site | Clear browser cache (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows) or wait a few minutes for the hosting provider to redeploy |
 | GitHub Pages shows old version | Go to repo Settings → Pages and confirm the correct branch is selected; allow up to 5 minutes for changes to propagate |
-# MyTrucksure.com-Ready-to-send-
