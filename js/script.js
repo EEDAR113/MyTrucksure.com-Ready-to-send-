@@ -120,3 +120,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Benefits carousel is handled by inline script in index.html ──
 // (self-contained: auto-rotate, drag/swipe, arrows, dots)
+
+// ═══════════════ SITE SEARCH (NAV BAR) ═══════════════
+// Handles the search icon in the navbar on all pages.
+// Clicking the icon expands a small input; pressing Enter navigates to search.html?q=...
+
+function initNavSearch() {
+  var btn = document.getElementById('navSearchBtn');
+  var form = document.getElementById('navSearchForm');
+  var input = document.getElementById('navSearchInput');
+  if (!btn || !form || !input) return;
+
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (form.classList.contains('expanded')) {
+      // Submit if there's a query
+      submitNavSearch(input);
+    } else {
+      form.classList.add('expanded');
+      input.focus();
+    }
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitNavSearch(input);
+    }
+    if (e.key === 'Escape') {
+      form.classList.remove('expanded');
+      input.value = '';
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', function(e) {
+    if (form.classList.contains('expanded') && !form.contains(e.target)) {
+      if (!input.value.trim()) {
+        form.classList.remove('expanded');
+      }
+    }
+  });
+}
+
+function submitNavSearch(input) {
+  var q = input.value.trim();
+  if (!q) return;
+  // Determine the correct path to search.html based on current page depth
+  var path = window.location.pathname;
+  var searchUrl;
+  if (path.indexOf('/pages/events/') !== -1) {
+    // We're in pages/events/ — go up 2 levels
+    searchUrl = '../search.html?q=' + encodeURIComponent(q);
+  } else if (path.indexOf('/pages/') !== -1) {
+    // We're in pages/ — same directory
+    searchUrl = 'search.html?q=' + encodeURIComponent(q);
+  } else {
+    // We're at root (index.html)
+    searchUrl = 'pages/search.html?q=' + encodeURIComponent(q);
+  }
+  window.location.href = searchUrl;
+}
+
+document.addEventListener('DOMContentLoaded', initNavSearch);
