@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search - MyTrucksure</title>
+<meta name="description" content="Search the MyTrucksure website.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">
+      <img src="../images/MyTrucksure_logo.png" alt="MyTrucksure Logo">
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link" href="../index.html" data-page="home">Home</a>
+      <div class="nav-dropdown">
+        <a class="nav-link" href="partners.html" data-page="partners">Partners</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="partners.html#partnerships">Partnerships</a>
+          <a class="dropdown-item" href="partners.html#integrations">Integrations</a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <a class="nav-link" href="solutions.html" data-page="solutions">Solutions</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="solutions.html#underwriting">Underwriting</a>
+          <a class="dropdown-item" href="solutions.html#policyadmin">Policy Admin</a>
+          <a class="dropdown-item" href="solutions.html#billing">Billing &amp; Payments</a>
+        </div>
+      </div>
+      <a class="nav-link" href="events.html" data-page="events">Events</a>
+      <a class="nav-link nav-cta" href="contact.html" data-page="contact">Contact Us</a>
+    </div>
+    <div class="nav-search-form" id="navSearchForm">
+      <button class="nav-search-btn" id="navSearchBtn" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <input type="text" id="navSearchInput" placeholder="Search…" autocomplete="off">
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════ SEARCH PAGE ═══════════════ -->
+<section class="search-page-section">
+  <div class="container">
+    <div class="search-bar-wrap">
+      <svg class="search-bar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-bar-input" id="searchPageInput" placeholder="Search this site…" autocomplete="off">
+    </div>
+    <div class="search-page-results" id="searchPageResults">
+      <!-- Results injected here by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <p class="footer-text">Copyright &copy; 2025 MyTrucksure. All rights reserved.</p>
+      <div class="footer-powered">
+        <span>Powered by</span>
+        <a href="https://insuremo.com/en/" target="_blank">InsureMO®</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/search-index.js"></script>
+<script src="../js/script.js"></script>
+<script>
+(function(){
+  var input = document.getElementById('searchPageInput');
+  var resultsDiv = document.getElementById('searchPageResults');
+
+  // Read query from URL ?q=...
+  var params = new URLSearchParams(window.location.search);
+  var initialQuery = params.get('q') || '';
+  if (initialQuery) {
+    input.value = initialQuery;
+    performSearch(initialQuery);
+  }
+
+  // Live search on typing
+  input.addEventListener('input', function(){
+    var q = this.value.trim();
+    // Update URL without reload
+    var newUrl = window.location.pathname + (q ? '?q=' + encodeURIComponent(q) : '');
+    history.replaceState(null, '', newUrl);
+    performSearch(q);
+  });
+
+  // Focus input on load
+  input.focus();
+
+  function performSearch(query) {
+    resultsDiv.innerHTML = '';
+    if (!query || query.length < 1) {
+      return;
+    }
+
+    var q = query.toLowerCase();
+    var matches = [];
+
+    for (var i = 0; i < SEARCH_INDEX.length; i++) {
+      var page = SEARCH_INDEX[i];
+      var contentLower = page.content.toLowerCase();
+      var titleLower = page.title.toLowerCase();
+
+      // Check if query exists in title or content
+      if (titleLower.indexOf(q) !== -1 || contentLower.indexOf(q) !== -1) {
+        // Build snippet with highlighted match
+        var snippet = buildSnippet(page.content, query);
+        matches.push({
+          title: page.title,
+          url: resolveUrl(page.url),
+          snippet: snippet
+        });
+      }
+    }
+
+    if (matches.length === 0) {
+      resultsDiv.innerHTML = '<div class="search-page-empty">No results found for "<strong>' + escapeHtml(query) + '</strong>"</div>';
+      return;
+    }
+
+    for (var j = 0; j < matches.length; j++) {
+      var m = matches[j];
+      var item = document.createElement('a');
+      item.className = 'search-page-result';
+      item.href = m.url;
+
+      var titleEl = document.createElement('h3');
+      titleEl.className = 'search-page-result-title';
+      titleEl.textContent = m.title;
+
+      var snippetEl = document.createElement('p');
+      snippetEl.className = 'search-page-result-snippet';
+      snippetEl.innerHTML = m.snippet;
+
+      item.appendChild(titleEl);
+      item.appendChild(snippetEl);
+      resultsDiv.appendChild(item);
+    }
+  }
+
+  function buildSnippet(content, query) {
+    var q = query.toLowerCase();
+    var contentLower = content.toLowerCase();
+    var idx = contentLower.indexOf(q);
+    if (idx === -1) return truncate(content, 200);
+
+    // Extract a window around the match
+    var snippetRadius = 120;
+    var start = Math.max(0, idx - snippetRadius);
+    var end = Math.min(content.length, idx + query.length + snippetRadius);
+
+    var raw = content.substring(start, end);
+    var prefix = start > 0 ? '...' : '';
+    var suffix = end < content.length ? '...' : '';
+
+    // Highlight ALL occurrences of the query in the snippet
+    var highlighted = highlightAll(raw, query);
+    return prefix + highlighted + suffix;
+  }
+
+  function highlightAll(text, query) {
+    var q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + q + ')', 'gi');
+    return escapeHtml(text).replace(new RegExp('(' + escapeForRegex(query) + ')', 'gi'), '<mark class="search-highlight">$1</mark>');
+  }
+
+  function escapeForRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function truncate(str, len) {
+    if (str.length <= len) return escapeHtml(str);
+    return escapeHtml(str.substring(0, len)) + '...';
+  }
+
+  // Resolve URL relative to site root from within /pages/search.html
+  function resolveUrl(url) {
+    // URLs in the index are relative to root (e.g. "index.html", "pages/partners.html")
+    // We're in /pages/search.html, so we need to go up one level for root files
+    if (url.indexOf('pages/') === 0) {
+      // Same directory level — just strip "pages/"
+      return url.replace('pages/', '');
+    } else {
+      // Root-level file like index.html
+      return '../' + url;
+    }
+  }
+})();
+</script>
+</body>
+</html>
